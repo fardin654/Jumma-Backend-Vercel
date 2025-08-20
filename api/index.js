@@ -24,10 +24,10 @@ mongoose.connect(process.env.MONGODB_URI, {
 .catch(err => console.error('MongoDB connection error:', err));
 
 // Routes
-app.use('/api/members', require('../backend/routes/members'));
-app.use('/api/expenses', require('../backend/routes/expenses'));
-app.use('/api/rounds', require('../backend/routes/rounds'));
-app.use('/api/wallets', require('../backend/routes/wallet'));
-app.use('/api/payments', require('../backend/routes/payments'));
+app.use('/api/members', require('../routes/members'));
+app.use('/api/expenses', require('../routes/expenses'));
+app.use('/api/rounds', require('../routes/rounds'));
+app.use('/api/wallets', require('../routes/wallet'));
+app.use('/api/payments', require('../routes/payments'));
 
 module.exports = app;
