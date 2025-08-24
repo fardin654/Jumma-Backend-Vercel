@@ -29,6 +29,6 @@ app.use('/api/expenses', require('../routes/expenses'));
 app.use('/api/rounds', require('../routes/rounds'));
 app.use('/api/wallets', require('../routes/wallet'));
 app.use('/api/payments', require('../routes/payments'));
-app.use('/api/contacts', require('./routes/Contacts'));
+app.use('/api/contacts', require('../routes/contacts'));
 
 module.exports = app;
