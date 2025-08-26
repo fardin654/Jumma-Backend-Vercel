@@ -11,7 +11,9 @@ router.post('/', async (req, res) => {
     const members = await Member.find();
     const lastRound = await Round.findOne().sort({ roundNumber: -1 });
     const fixedAmount = req.body.fixed.fixedAmount || 400;
-    
+
+    const roundNumber = lastRound ? lastRound.roundNumber + 1 : 1;
+
     // Create payments array with all members
     const payments = await Promise.all(members.map(async (member) => {
       // Find the member's last payment date from previous rounds
@@ -36,7 +38,7 @@ router.post('/', async (req, res) => {
     }));
 
     const round = new Round({
-      roundNumber: req.body.roundNumber,
+      roundNumber: roundNumber,
       date: new Date(), 
       payments: payments,
       isCompleted: false,
