@@ -30,7 +30,7 @@ app.use('/api/rounds', require('../routes/rounds'));
 app.use('/api/wallets', require('../routes/wallet'));
 app.use('/api/payments', require('../routes/payments'));
 app.use('/api/contacts', require('../routes/contacts'));
-app.use('/api/user', require('./routes/users'));
-app.use('/api/requests', require('./routes/requests'));
+app.use('/api/user', require('../routes/users'));
+app.use('/api/requests', require('../routes/requests'));
 
 module.exports = app;
