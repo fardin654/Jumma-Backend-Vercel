@@ -32,6 +32,6 @@ app.use('/api/payments', require('../routes/payments'));
 app.use('/api/contacts', require('../routes/contacts'));
 app.use('/api/user', require('../routes/users'));
 app.use('/api/requests', require('../routes/requests'));
-app.use('/api/forgot-password', require('./routes/forgotPassword'));
+app.use('/api/forgot-password', require('../routes/forgotPassword'));
 
 module.exports = app;
