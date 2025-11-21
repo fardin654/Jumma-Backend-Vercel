@@ -22,6 +22,12 @@ const userSchema = new mongoose.Schema({
     AccessCode:{
         type: String,
         required: true
+    },
+    resetOTP:{
+         type: String 
+    },
+    otpExpiry:{
+         type: Date
     }
 });
 
