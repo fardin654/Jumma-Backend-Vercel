@@ -1,3 +1,5 @@
+export const config = { runtime: "nodejs" };
+
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");

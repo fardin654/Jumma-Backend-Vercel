@@ -1,6 +1,8 @@
+export const config = { runtime: "nodejs" };
+
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
+import { connectDB } from "./db.js";
 require('dotenv').config();
 
 const app = express();
@@ -15,23 +17,18 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
+//Mongodb Connection
+await connectDB();
 
 // Routes
-app.use('/api/members', require('../routes/members'));
-app.use('/api/expenses', require('../routes/expenses'));
-app.use('/api/rounds', require('../routes/rounds'));
-app.use('/api/wallets', require('../routes/wallet'));
-app.use('/api/payments', require('../routes/payments'));
-app.use('/api/contacts', require('../routes/contacts'));
-app.use('/api/user', require('../routes/users'));
-app.use('/api/requests', require('../routes/requests'));
-app.use('/api/forgot-password', require('../routes/forgotPassword'));
+app.use('/api/members', require('./members.js'));
+app.use('/api/expenses', require('./expenses.js'));
+app.use('/api/rounds', require('./rounds.js'));
+app.use('/api/wallets', require('./wallet.js'));
+app.use('/api/payments', require('./payments.js'));
+app.use('/api/contacts', require('./contacts.js'));
+app.use('/api/user', require('./users.js'));
+app.use('/api/requests', require('./requests.js'));
+app.use('/api/forgot-password', require('./forgotPassword.js'));
 
 module.exports = app;
