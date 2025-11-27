@@ -1,62 +1,88 @@
 export const config = { runtime: "nodejs" };
 
-const express = require('express');
-const router = express.Router();
-const Contacts = require('../models/Contacts');
+import { connectDB } from "../utils/db.js";
+import Contacts from "../models/Contacts.js";
 
-// Get all contacts
-router.get('/', async (req, res) => {
-  try {
-    const members = await Contacts.find({AccessCode: req.query.AccessCode});
-    res.json(members);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+export default async function handler(req, res) {
+  await connectDB();
 
-// Add new member
-router.post('/', async (req, res) => {
-  const member = new Contacts({
-    name: req.body.name,
-    contact: req.body.contact || '0',
-    description: req.body.description || '',
-    AccessCode: req.body.AccessCode
-  });
+  const { method } = req;
 
-  try {
-    const newMember = await member.save();
-    res.status(201).json(newMember);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Update member
-router.patch('/:id', async (req, res) => {
-  try {
-    const member = await Contacts.findById(req.params.id);
-    if (!member) return res.status(404).json({ message: 'Member not found' });
-
-    if (req.body.name !== undefined) member.name = req.body.name;
-    if (req.body.contact !== undefined) member.contact = req.body.contact;
-    if (req.body.description !== undefined) member.description = req.body.description;
-    const updatedMember = await member.save();
-    res.json(updatedMember);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Delete Member
-router.delete('/:id', async (req, res) => {
-  try {
-    const member = await Contacts.findByIdAndDelete(req.params.id);
-    if (!member) {
-      return res.status(404).json({ message: 'Contact not found' });
+  // ----------------------------
+  // GET /api/contacts
+  // ----------------------------
+  if (method === "GET") {
+    try {
+      const { AccessCode } = req.query;
+      const members = await Contacts.find({ AccessCode });
+      return res.status(200).json(members);
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
     }
-    res.json({ message: 'Contact deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
   }
-});
-module.exports = router;
+
+  // ----------------------------
+  // POST /api/contacts
+  // ----------------------------
+  if (method === "POST") {
+    try {
+      const member = new Contacts({
+        name: req.body.name,
+        contact: req.body.contact || "0",
+        description: req.body.description || "",
+        AccessCode: req.body.AccessCode
+      });
+
+      const newMember = await member.save();
+      return res.status(201).json(newMember);
+    } catch (err) {
+      return res.status(400).json({ message: err.message });
+    }
+  }
+
+  // ----------------------------
+  // PATCH /api/contacts/:id
+  // ----------------------------
+  if (method === "PATCH") {
+    try {
+      const { id } = req.query;
+      const member = await Contacts.findById(id);
+
+      if (!member) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+
+      if (req.body.name !== undefined) member.name = req.body.name;
+      if (req.body.contact !== undefined) member.contact = req.body.contact;
+      if (req.body.description !== undefined) member.description = req.body.description;
+
+      const updatedMember = await member.save();
+      return res.status(200).json(updatedMember);
+    } catch (err) {
+      return res.status(400).json({ message: err.message });
+    }
+  }
+
+  // ----------------------------
+  // DELETE /api/contacts/:id
+  // ----------------------------
+  if (method === "DELETE") {
+    try {
+      const { id } = req.query;
+      const deleted = await Contacts.findByIdAndDelete(id);
+
+      if (!deleted) {
+        return res.status(404).json({ message: "Contact not found" });
+      }
+
+      return res.status(200).json({ message: "Contact deleted successfully" });
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  // ----------------------------
+  // Method Not Allowed
+  // ----------------------------
+  return res.status(405).json({ message: "Method Not Allowed" });
+}

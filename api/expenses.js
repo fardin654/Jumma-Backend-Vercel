@@ -1,44 +1,64 @@
 export const config = { runtime: "nodejs" };
 
-const express = require('express');
-const router = express.Router();
-const Expense = require('../models/Expense');
-const Round = require('../models/Round');
+import { connectDB } from "../utils/db.js";
+import Expense from "../models/Expense.js";
+import Round from "../models/Round.js";
 
-// Add new expense
-router.post('/', async (req, res) => {
-  const expense = new Expense({
-    description: req.body.description,
-    amount: req.body.amount,
-    paidBy: req.body.paidBy,
-    roundId: req.body.roundId,
-    AccessCode: req.body.AccessCode
-  });
+export default async function handler(req, res) {
+  await connectDB();
 
-  try {
-    const newExpense = await expense.save();
-    
-    // Update round total expenses if roundId is provided
-    if (req.body.roundId) {
-      await Round.findByIdAndUpdate(req.body.roundId, {
-        $inc: { totalExpenses: req.body.amount }
+  const { method } = req;
+
+  // --------------------------
+  // Add new expense (POST)
+  // --------------------------
+  if (method === "POST") {
+    try {
+      const { description, amount, paidBy, roundId, AccessCode } = req.body;
+
+      const expense = new Expense({
+        description,
+        amount,
+        paidBy,
+        roundId,
+        AccessCode
       });
+
+      const newExpense = await expense.save();
+
+      // If expense belongs to a round, update the round's totalExpenses
+      if (roundId) {
+        await Round.findByIdAndUpdate(roundId, {
+          $inc: { totalExpenses: amount }
+        });
+      }
+
+      return res.status(201).json(newExpense);
+    } catch (err) {
+      return res.status(400).json({ message: err.message });
     }
-    
-    res.status(201).json(newExpense);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
   }
-});
 
-// Get all expenses
-router.get('/', async (req, res) => {
-  try {
-    const expenses = await Expense.find({AccessCode: req.body.AccessCode}).populate('paidBy', 'name');
-    res.json(expenses);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  // --------------------------
+  // Get all expenses (GET)
+  // --------------------------
+  if (method === "GET") {
+    try {
+      const { AccessCode } = req.query;
+
+      const expenses = await Expense.find({ AccessCode }).populate(
+        "paidBy",
+        "name"
+      );
+
+      return res.status(200).json(expenses);
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
+    }
   }
-});
 
-module.exports = router;
+  // --------------------------
+  // Invalid method
+  // --------------------------
+  return res.status(405).json({ message: "Method Not Allowed" });
+}
