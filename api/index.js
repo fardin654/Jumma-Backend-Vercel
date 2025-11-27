@@ -2,7 +2,7 @@ export const config = { runtime: "nodejs" };
 
 const express = require('express');
 const cors = require('cors');
-import { connectDB } from "./db.js";
+import { connectDB } from "utils/db.js";
 require('dotenv').config();
 
 const app = express();
