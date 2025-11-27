@@ -18,7 +18,10 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 //Mongodb Connection
-await connectDB();
+export default async function handler(req, res) {
+  await connectDB();
+  res.json({ ok: true });
+}
 
 // Routes
 app.use('/api/members', require('./members.js'));
