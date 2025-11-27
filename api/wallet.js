@@ -1,33 +1,38 @@
 export const config = { runtime: "nodejs" };
 
-const express = require('express');
-const router = express.Router();
-const Wallet = require('../models/wallet');
+import { connectDB } from "../utils/db.js";
+import Wallet from "../models/wallet.js";
 
-// Get Wallet Balance
-router.get('/', async (req, res) => {
-  try {
-    let walletData = await Wallet.findOne({AccessCode: req.query.AccessCode});
-    if (!walletData) {
-      walletData = new Wallet({ Balance: 0, AccessCode: req.query.AccessCode });
-      await walletData.save();
+export default async function handler(req, res) {
+  await connectDB();
+
+  if (req.method === "GET") {
+    try {
+      const { AccessCode } = req.query;
+
+      let walletData = await Wallet.findOne({ AccessCode });
+
+      if (!walletData) {
+        walletData = new Wallet({ Balance: 0, AccessCode });
+        await walletData.save();
+      }
+
+      return res.status(200).json({ Balance: walletData.Balance });
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
     }
-    res.json({ Balance: walletData.Balance });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
   }
-});
 
-// Create Wallet
-router.post('/', async (req,res) => {
-  try{
-    walletData = new Wallet({ Balance: 0, AccessCode: req.body.AccessCode });
-    await walletData.save();
-    res.json("Wallet Created.");
-  }catch{
-    res.status(500).json({message: err.message});
+  if (req.method === "POST") {
+    try {
+      const { AccessCode } = req.body;
+      const walletData = new Wallet({ Balance: 0, AccessCode });
+      await walletData.save();
+      return res.status(200).json("Wallet Created.");
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
+    }
   }
-});
 
-
-module.exports = router;
+  return res.status(405).json({ message: "Method Not Allowed" });
+}
